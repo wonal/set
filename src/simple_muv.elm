@@ -37,9 +37,11 @@ type Msg =
 update : Msg -> Model -> Model 
 update msg model = 
     case msg of 
-        Card n color -> if (modBy 3 n) == 0 then { model | color1 = color, counter = (modBy 3 (n+1)) }
-                                                else if (modBy 3 n == 1) then { model | color2 = color, counter = (modBy 3 (n+1))}
-                                                                         else { model | color3 = color, counter = (modBy 3 (n+1))}
+        Card n color -> case (modBy 3 n) of 
+                            0 -> { model | color1 = color, counter = (modBy 3 (n+1))}
+                            1 -> { model | color2 = color, counter = (modBy 3 (n+1))}
+                            3 -> { model | color3 = color, counter = (modBy 3 (n+1))}
+                            _ -> { model | color3 = color, counter = (modBy 3 (n+1))}
         Button status -> { model | status = status }
         
 
