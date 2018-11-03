@@ -20,7 +20,29 @@ type Color
     = Red 
     | Green 
     | Purple
-    | Blank
+    | NoColor
+
+type Shape
+    = Round
+    | Diamond
+    | Wave
+    | NoShape
+
+type Number
+    = One
+    | Two
+    | Three
+    | NoNum
+type Attribute
+    = Color
+    | Shape
+    | Number
+
+type alias Card = 
+    {   number : Number 
+    ,   color  : Color
+    ,   shape  : Shape 
+    }
 
 type Status 
     = Same
@@ -28,17 +50,17 @@ type Status
 
 init : Model 
 init = 
-  Model Blank Blank Blank Same 0
+  Model NoColor NoColor NoColor Same 0
 
 ----------- UPDATE
 
 type Msg = 
-  Card Int Color | Button Status
+  C Int Color | Button Status
 
 update : Msg -> Model -> Model 
 update msg model = 
     case msg of 
-        Card n color -> let addOne = (modBy 3 (n+1)) in case (modBy 3 n) of 
+        C n color -> let addOne = (modBy 3 (n+1)) in case (modBy 3 n) of 
                             0 -> { model | color1 = color, counter = addOne}
                             1 -> { model | color2 = color, counter = addOne}
                             3 -> { model | color3 = color, counter = addOne}
@@ -52,7 +74,7 @@ view : Model -> Html Msg
 view model = 
    div []
        (
-       (map (\color -> (button [ onClick (Card model.counter color)] [text (show color)])) [Red, Purple, Green, Red, Purple, Green]) ++
+       (map (\color -> (button [ onClick (C model.counter color)] [text (show color)])) [Red, Purple, Green, Red, Purple, Green]) ++
        [div [] [button [ onClick (Button (colorTest model.color1 model.color2 model.color3)) ] [text "Check"]]] ++
        [div [] [text (if model.status == Same then "Same!" else "Different!")]])
 
@@ -60,10 +82,13 @@ colorTest : Color -> Color -> Color -> Status
 colorTest c1 c2 c3 = if (c1 == c2 && c2 == c3) then Same
                                                else Different
 
+sameAttribute : Attribute -> Attribute -> Attribute -> Status
+sameAttribute a1 a2 a3 = if a1 == a2 && a2 == a3 then Same else Different
+
 show : Color -> String
 show c = 
     case c of 
         Red -> "Red"
         Purple -> "Purple"
         Green -> "Green"
-        Blank -> "_"
+        NoColor -> "_"
