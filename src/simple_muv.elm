@@ -1,7 +1,7 @@
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import List exposing(map)
+import List exposing(map, foldr)
 
 main =
    Browser.sandbox {init = init, update = update, view = view}
@@ -62,26 +62,23 @@ update msg model =
                             1 -> {card1 = model.card1, card2 = (setAttributes c shape model.card2), card3 = model.card3, status = model.status, counter = addOne}
                             2 -> {card1 = model.card1, card2 = model.card2, card3 = (setAttributes c shape model.card3), status = model.status, counter = addOne}
                             _ -> {card1 = model.card1, card2 = model.card2, card3 = (setAttributes c shape model.card3), status = model.status, counter = addOne}
-        Selected m -> { model | status = checkAttributes m}
+        Selected m -> { model | status = checkAttributes m.card1 m.card2 m.card3}
 
 setAttributes : Color -> Shape -> Card -> Card
 setAttributes newColor newShape card = 
     { card | color = newColor, shape = newShape}
 
-checkAttributes : Model -> Status
-checkAttributes m = let sameColor = allSame m.card1.color m.card2.color m.card3.color in 
-                    let sameShape = allSame m.card1.shape m.card2.shape m.card3.shape in 
-                    let differentColor = allDifferent m.card1.color m.card2.color m.card3.color in 
-                    let differentShape = allDifferent m.card1.shape m.card2.shape m.card3.shape in 
-                            if sameColor && sameShape then Same    
-                                        else if differentColor && differentShape then Same 
-                                                                                 else Different
 
-allSame : a -> a -> a -> Bool
-allSame a1 a2 a3 = if a1 == a2 && a2 == a3 then True else False
+checkAttributes : Card -> Card -> Card -> Status
+checkAttributes c1 c2 c3 = case (invalidSet c1.color c2.color c3.color) || (invalidSet c1.shape c2.shape c3.shape) of 
+                                True -> Different 
+                                False -> Same
 
-allDifferent : a -> a -> a -> Bool
-allDifferent a1 a2 a3 = if a1 /= a2 && a2 /= a3 && a1 /= a3 then True else False 
+invalidSet : a -> a -> a -> Bool
+invalidSet a1 a2 a3 =  if (a1 == a2 && a2 /= a3) 
+                        || (a1 == a3 && a3 /= a2) 
+                        || (a2 == a3 && a3 /= a1) then True else False 
+                                                          
 
 -------------VIEW
 view : Model -> Html Msg
